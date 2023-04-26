@@ -42,13 +42,17 @@ func install() {
 - Should exit 0 if successful
 */
 func build() {
-	// log.Println("Building CLI")
 	// execute npm run build from within the "module_registry" directory
 	os.Chdir("module_registry")
 	cmd := exec.Command("bash", "-c", "npm run build > /dev/null 2>&1")
 	execute(cmd)
 	fmt.Println("CLI built")
 	// maybe: move the built cli to the root directory of the project
+
+	// move scripts into webpage directory
+	os.Chdir("..")
+	cmd = exec.Command("bash", "-c", "cp -a module_registry/out/ webpage/scripts/out")
+	execute(cmd)
 }
 
 /*
@@ -108,6 +112,12 @@ func run() {
 	execute(cmd)
 }
 
+func server() {
+	// run the server.js
+	cmd := exec.Command("node", "webpage/server.js", "-f", os.Args[1]) //nolint:gosec
+	execute(cmd)
+}
+
 func main() {
 
 	if len(os.Args) < 2 {
@@ -121,6 +131,8 @@ func main() {
 		build()
 	case "test":
 		test()
+	case "server":
+		server()
 	default:
 		// check if the argument is a file
 		if _, err := os.Stat(os.Args[1]); err == nil {
