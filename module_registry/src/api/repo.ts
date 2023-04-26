@@ -237,6 +237,7 @@ export class Repository {
 
         // return reviewed requests divided by number of all pull requests
         return (num_reviewed/pullResponse.data.length);
+    }
     /**
      * calculate metric for number of version specific dependencies
      * @returns 0-1, 1 representing all dependencies are version specific, 0 represents none
