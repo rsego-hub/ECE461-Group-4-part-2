@@ -2,29 +2,30 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Package Search</title>
+    <title>Login</title>
+    <link rel = "stylesheet" href="styles/login.css">
+
+    <script>var exports = {};</script>
+    <script defer src="../module_registry/out/user/user.js" type="module"></script>
+    <script defer src="scripts/io_ops.js" type="module"></script>
+    <script defer src="scripts/loginScript.js" type="module"></script>
+
 </head>
 <body>
-    <select id="sort-select">
-        <option value="name-asc">Name (A-Z)</option>
-        <option value="name-desc">Name (Z-A)</option>
-        <option value="rating-asc">Rating (Low-High)</option>
-        <option value="rating-desc">Rating (High-Low)</option>
-    </select>
-    <input type="text" id="search-input" placeholder="Search packages">
-    <table id="results-table">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Rating</th>
-                <th>Download</th>
-            </tr>
-        </thead>
-        <tbody id="results-body">
-        </tbody>
-    </table>
-    <div id="add-package-form-container"></div>
-    <script src="scripts/package_storage.js"></script>
+<div class="Box">
+    <h2>Login</h2>
+    <div id = "error"></div>
+    <form id ="form" action="/" method="post">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        <input type="submit" value="Login">
+    </form>
+</div>
 </body>
+
+
 </html>
