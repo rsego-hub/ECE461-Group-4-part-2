@@ -7,14 +7,13 @@ const path = require("path");
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '..')));
-
+app.use(express.static(__dirname));
 
 
 
 app.use(bodyParser.json());
 
-const packagesFilePath = path.join(__dirname, '..', "package_storage.json");
+const packagesFilePath = path.join(__dirname, "package_storage.json");
 
 app.get("/package_storage", (req, res) => {
     fs.readFile(packagesFilePath, "utf8", (err, data) => {
