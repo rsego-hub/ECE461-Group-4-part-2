@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Package Search</title>
+</head>
+<body>
+    <select id="sort-select">
+        <option value="name-asc">Name (A-Z)</option>
+        <option value="name-desc">Name (Z-A)</option>
+        <option value="rating-asc">Rating (Low-High)</option>
+        <option value="rating-desc">Rating (High-Low)</option>
+    </select>
+    <input type="text" id="search-input" placeholder="Search packages">
+    <table id="results-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Rating</th>
+                <th>Download</th>
+            </tr>
+        </thead>
+        <tbody id="results-body">
+        </tbody>
+    </table>
+    <div id="add-package-form-container"></div>
+    <script src="scripts/package_storage.js"></script>
+</body>
+</html>

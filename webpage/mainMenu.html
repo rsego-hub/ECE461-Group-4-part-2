@@ -11,18 +11,7 @@
 </head>
 <body>
     <div class="search-container">
-        <input id="search-input" class="search-input" type="text" placeholder="Type To Search...">
-        <button class="search-button" type="submit" onclick="performSearch()">Search</button>
-        <div>
-            <input type="checkbox" id="regex-checkbox">
-            <label for="regex-checkbox">Use Regular Expression</label>
-        </div>
-    </div>
-    <div id="results" class="results"></div>
-    <div class="upload-container">
-        <label for="file-upload" class="upload-label">Choose a file to upload:</label>
-        <input id="file-upload" type="file" multiple>
-        <button id="upload-button" class="upload-button" onclick="uploadFile()">Upload</button>
+        <button id="search-button" class="search-button" onclick="exports.go_to_search()">Search/Upload</button>
     </div>
     <div id="uploaded-files" class="uploaded-files"></div>
     <div class="login_container">
