@@ -109,14 +109,16 @@ export class Repository {
     current_version: string;
     size: Number;
     history_list: History[];
+    dependencies: string[];
 
-    constructor(name:string, owner: string, url: string, current_version:string, size:Number, history_list:History[]) {
+    constructor(name:string, owner: string, url: string, current_version:string, size:Number, history_list:History[], dependencies:string[]) {
         this.name = name;
         this.owner = owner;
         this.url = url;
         this.current_version = current_version;
         this.size = size;
         this.history_list = history_list;
+        this.dependencies = dependencies;
     }
 
     /**
@@ -189,7 +191,42 @@ export class Repository {
     get_readme() {
         return getReadme(this.owner, this.name);
     }
+
+    /**
+     * collect the bill of materials for the repo, extract the dependency names and their
+     * version
+     * @returns list of dependencies and their version number
+     */
+    async get_current_dependencies() {
+        const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+        try {
+            const response = await octokit.request('GET /repos/{owner}/{repo}/dependency-graph/sbom', {
+                accept: 'application/vnd.github+json',
+                owner: this.owner,
+                repo: this.name,
+                basehead: "main"
+                
+            });
+
+            // Get dependency names and their version numbers
+            let dependencies = [];
+            for(let dependency of response.data.sbom.packages) {
+                dependencies.push(dependency.name.concat(",", dependency.versionInfo));
+            }
+
+            return dependencies
+
+        } catch (error) {
+            console.error(error);
+            throw error;
+        }
+    }
     
+    /**
+     * Uses pull request query to find how much of the code was reviewed before it was added
+     * to the repository
+     * @returns 0-1 representing porportion of reviewed code
+     */
     async review_metric() {
         
         // get list of pull requests
@@ -244,30 +281,27 @@ export class Repository {
      * @returns 0-1, 1 representing all dependencies are version specific, 0 represents none
      */
     pinned_metric() {
-        // helper function for detecting if value is unique in list
-        function onlyUnique(value:string, index:number, array:string[]) {
-            return array.indexOf(value) === index;
-        }
-
-        // get all dependencies throughout hisitory, even repeats
-        let all_dependencies:string[] = []
-        for(let history of this.history_list) {
-            for(let dependency of history.dependencies) {
-                all_dependencies.push(dependency)
-            } 
-        }
-
-        let unique_dependencies:string[] = all_dependencies.filter(onlyUnique);
-        let unpinned_dependencies:string[] = this.history_list[this.history_list.length - 1].dependencies;
-
-        let num_dependencies = unique_dependencies.length;
-        let num_pinned = num_dependencies - unpinned_dependencies.length;
-
-        // if no dependencies, should be 1 since technically all existing dependencies are pinned
+        // Get number of all dependencies
+        let num_dependencies = this.dependencies.length;
         if(num_dependencies == 0) {
-            return 1;
+            return 1; // no dependencies, nothing needs to be pinned
         }
-        return num_pinned / num_dependencies ;
+
+        // Count number of pinned dependencies
+        let num_pinned = 0;
+        let is_not_pinned = new RegExp('-|\||>|<');
+        for(let dependency of this.dependencies) {
+            let version_info = dependency.split(",")[1]
+            // regex behaving odddly for this, relying on includes instead
+            if(!version_info.includes('-') && !version_info.includes('|') && !version_info.includes('<') && !version_info.includes('>')) {
+                num_pinned++;
+                console.log("is pinned".concat(version_info));
+            } else {
+                console.log("not pinned".concat(version_info));
+            }
+        }
+
+        return num_pinned/num_dependencies;
     }
 }
 
@@ -276,7 +310,7 @@ export class Repository {
  * @param url to find the repo
  * @returns correctly instantiated repostory object
  */
-export async function create_repo_from_url(url: string) {
+export async function create_repo_from_url(url: string, creator_username: string) {
 
     // If given npmjs repo, get corresponding github repo
     let true_url = url;
@@ -293,16 +327,14 @@ export async function create_repo_from_url(url: string) {
     // Collect repo info
     const parsed_repo = parse(true_url);
 
-    // If prexisting version number exists, get it, otherwise declare as first version
-    /*
-    let true_version = "1.0";
-    const regexp = new RegExp('^(\d+\.)?(\d+\.)?(\*|\d+)$');
-    if(regexp.test(parsed_repo.branch)) {
-        true_version = parsed_repo.branch;
-    } 
-    */
+    // Create basic repo object
+    const repository = new Repository(parsed_repo.name, parsed_repo.owner, true_url, "1.0", 0, [], []);
 
-    const repository = new Repository(parsed_repo.name, parsed_repo.owner, true_url, "1.0", 0, []);
+    // Collect dependencies and annd history event to repository
+    let dependencies = await repository.get_current_dependencies();
+    let first_history = new History("upload", repository.current_version, creator_username)
+    repository.history_list.push(first_history)
+
     return repository;
 }
 
@@ -310,12 +342,10 @@ export class History {
     action: string;
     version: string;
     username: string;
-    dependencies: string[];
 
-    constructor(action:string, version:string, username:string, dependencies:string[]) {
+    constructor(action:string, version:string, username:string) {
         this.action = action;
         this.version = version;
         this.username = username;
-        this.dependencies = dependencies;
     }
 }
