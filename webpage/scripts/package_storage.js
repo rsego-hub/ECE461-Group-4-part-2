@@ -2,27 +2,40 @@ let packages = [];
 
 const searchInput = document.getElementById("search-input");
 const resultsBody = document.getElementById("results-body");
+const sortSelect = document.getElementById("sort-select");
 
 function createDownloadButton(packageName) {
     const button = document.createElement("button");
     button.textContent = "Download";
     button.addEventListener("click", () => {
         console.log(`Downloading ${packageName}...`);
-
     });
     return button;
 }
 
-function updateTable(searchTerm) {
+function sortPackages(packages, sortMethod) {
+    switch (sortMethod) {
+        case "name-asc":
+            return packages.sort((a, b) => a.name.localeCompare(b.name));
+        case "name-desc":
+            return packages.sort((a, b) => b.name.localeCompare(a.name));
+        case "rating-asc":
+            return packages.sort((a, b) => a.rating - b.rating);
+        case "rating-desc":
+            return packages.sort((a, b) => b.rating - a.rating);
+        default:
+            return packages;
+    }
+}
+
+function updateTable(searchTerm,sortMethod) {
     resultsBody.innerHTML = "";
 
-    if(!Array.isArray(packages)) {
-        packages = [];
-    }
-
     const filteredPackages = packages.filter(package => package.name.toLowerCase().includes(searchTerm.toLowerCase()));
+    const sortedPackages = sortPackages(filteredPackages, sortMethod);
 
-    for (const package of filteredPackages) {
+
+    for (const package of sortedPackages) {
         const row = document.createElement("tr");
 
         const nameCell = document.createElement("td");
@@ -41,6 +54,15 @@ function updateTable(searchTerm) {
     }
 }
 
+searchInput.addEventListener("input", (event) => {
+    updateTable(event.target.value);
+});
+
+sortSelect.addEventListener("change", () => {
+    updateTable(searchInput.value, sortSelect.value);
+});
+
+
 function createAddPackageForm() {
     const form = document.createElement("form");
     form.innerHTML = `
@@ -57,7 +79,7 @@ function createAddPackageForm() {
             rating: parseFloat(event.target.elements.rating.value),
         };
 
-        fetch("/package_storage.json", {
+        fetch("/package_storage", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -77,24 +99,16 @@ function createAddPackageForm() {
     return form;
 }
 
+document.getElementById("add-package-form-container").appendChild(createAddPackageForm());
+
 function fetchPackages() {
-    fetch("/package_storage.json")
-        .then(response => {
-            response.json()
-            
-        })
+    fetch("/package_storage")
+        .then(response => response.json())
         .then(data => {
-            console.log(data)
             packages = data;
             updateTable("");
         })
         .catch(error => console.error("Error fetching package data:", error));
 }
-
-searchInput.addEventListener("input", (event) => {
-    updateTable(event.target.value);
-});
-
-document.getElementById("add-package-form-container").appendChild(createAddPackageForm());
 
 fetchPackages();

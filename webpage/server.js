@@ -10,13 +10,12 @@ app.use(express.json());
 app.use(express.static(__dirname));
 console.log(__dirname)
 
-
 app.use(bodyParser.json());
 
-const packagesFilePath = path.join(__dirname, "/package_storage.json");
+const packagesFilePath = path.join(__dirname, "package_storage.json");
 console.log(packagesFilePath)
 
-app.get("/package_storage.json", (req, res) => {
+app.get("/package_storage", (req, res) => {
     fs.readFile(packagesFilePath, "utf8", (err, data) => {
         if (err) {
             res.status(500).send({ error: "Error reading packages file." });
@@ -27,7 +26,7 @@ app.get("/package_storage.json", (req, res) => {
     });
 });
 
-app.post("/package_storage.json", (req, res) => {
+app.post("/package_storage", (req, res) => {
     const newPackage = req.body;
 
     fs.readFile(packagesFilePath, "utf8", (err, data) => {
@@ -50,7 +49,7 @@ app.post("/package_storage.json", (req, res) => {
     });
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 9000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
