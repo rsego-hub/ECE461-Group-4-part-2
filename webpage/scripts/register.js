@@ -64,8 +64,8 @@ exports.go_to_main = go_to_main;
 
 // ------------------ Main Script ------------------------------
 
-if(sessionStorage.getItem("loggedIn") == "false") {
-    window.location.href = "login.html";
+if(sessionStorage.getItem("loggedIn") != "true") {
+    window.location.href = "index.html";
 }
 
 var form_R = document.getElementById("form-R");
