@@ -31,7 +31,15 @@ function sortPackages(packages, sortMethod) {
 function updateTable(searchTerm,sortMethod) {
     resultsBody.innerHTML = "";
 
-    const filteredPackages = packages.filter(package => package.name.toLowerCase().includes(searchTerm.toLowerCase()));
+    const filteredPackages = packages.filter(package => {
+        try {
+            const regex = new RegExp(searchTerm, "i");
+            return regex.test(package.name);
+        } catch (error) {
+            return false;
+        }
+    });
+    
     const sortedPackages = sortPackages(filteredPackages, sortMethod);
 
 
