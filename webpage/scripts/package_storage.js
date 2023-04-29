@@ -9,6 +9,9 @@ function createDownloadButton(packageName) {
     button.textContent = "Download";
     button.addEventListener("click", () => {
         console.log(`Downloading ${packageName}...`);
+        // !!!!!!!!!!!!!!
+        // PUT FETCH HERE
+        // !!!!!!!!!!!!!!
     });
     return button;
 }

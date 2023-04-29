@@ -1,3 +1,9 @@
+console.log('Current directory: ' + process.cwd());
+
+Object.defineProperty(exports, "__esModule", { value: true });
+
+const repo_api = require("./scripts/out/api/repo");
+
 const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
@@ -10,10 +16,21 @@ app.use(express.json());
 app.use(express.static(__dirname));
 console.log(__dirname)
 
+//const repo = require("./scripts/out/api/repo");
+
 app.use(bodyParser.json());
 
 const packagesFilePath = path.join(__dirname, "package_storage.json");
 console.log(packagesFilePath)
+
+app.get("/gcp_please", (req, res) => {
+    
+
+    var repo = repo_api.create_repo_from_url("https://github.com/lodash/lodash");
+    console.log(repo.name);
+
+})
+
 
 app.get("/package_storage", (req, res) => {
     fs.readFile(packagesFilePath, "utf8", (err, data) => {
