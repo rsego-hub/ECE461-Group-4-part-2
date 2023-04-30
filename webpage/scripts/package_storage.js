@@ -12,12 +12,14 @@ function createDownloadButton(packageName) {
     button.textContent = "Download";
     button.addEventListener("click", () => {
         console.log(`Downloading ${packageName}...`);
-        // !!!!!!!!!!!!!!
-        // PUT FETCH HERE
-        // !!!!!!!!!!!!!!
+
+        // Auto send get request for gcp_please
         window.location.href = "/gcp_please";
         messages.push('Downloading');
+
+        // Display download message
         messageElement.innerText = messages.join(",");
+
         /*
         fetch("/download", {
             method: "GET",

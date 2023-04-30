@@ -24,6 +24,7 @@ app.use(bodyParser.json());
 const packagesFilePath = path.join(__dirname, "package_storage.json");
 
 
+// On get request for gcp_please
 app.get("/gcp_please", (req, res) => {
 
     let url = "https://github.com/lodash/lodash";
@@ -72,6 +73,7 @@ app.get("/gcp_please", (req, res) => {
 })
 
 
+// When receiving get request for package_storage
 app.get("/package_storage", (req, res) => {
     fs.readFile(packagesFilePath, "utf8", (err, data) => {
         if (err) {
@@ -83,6 +85,7 @@ app.get("/package_storage", (req, res) => {
     });
 });
 
+// On post request of package_storage
 app.post("/package_storage", (req, res) => {
     const newPackage = req.body;
 
