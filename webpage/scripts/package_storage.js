@@ -1,3 +1,7 @@
+// Object.defineProperty(exports, "__esModule", { value: true });
+// const { create_repo_from_url } = require('./out/api/repo.js');
+// import { create_repo_from_url } from './out/api/repo.js';
+
 let packages = [];
 
 const searchInput = document.getElementById("search-input");
@@ -74,38 +78,93 @@ sortSelect.addEventListener("change", () => {
 function createAddPackageForm() {
     const form = document.createElement("form");
     form.innerHTML = `
-        <input type="text" name="name" placeholder="Package name" required>
-        <input type="number" name="rating" placeholder="Rating" step="0.1" min="0" max="5" required>
+        <input type="url" name="url" placeholder="Package URL" required>
         <button type="submit">Add package</button>
     `;
 
-    form.addEventListener("submit", (event) => {
+    form.addEventListener("submit", async (event) => {
         event.preventDefault();
+        
+        const url = event.target.elements.url.value;
+        
+        try {
+            const response = await fetch('/get_repo_info', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ url })
+            });
 
-        const newPackage = {
-            name: event.target.elements.name.value,
-            rating: parseFloat(event.target.elements.rating.value),
-        };
+            if (response.ok) {
+                const { name, rating } = await response.json();
+                const newPackage = {
+                    name,
+                    rating
+                };
 
-        fetch("/package_storage", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(newPackage),
-        })
-            .then(response => {
-                if (response.ok) {
+                // Post the newPackage to /package_storage
+                const addResponse = await fetch("/package_storage", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(newPackage),
+                });
+
+                if (addResponse.ok) {
                     fetchPackages();
                 } else {
-                    console.error("Error adding package:", response.statusText);
+                    console.error("Error adding package:", addResponse.statusText);
                 }
-            })
-            .catch(error => console.error("Error adding package:", error));
+            } else {
+                console.error("Error getting repo info:", response.statusText);
+            }
+        } catch (error) {
+            console.error("Error getting repo info:", error);
+        }
     });
 
     return form;
 }
+
+// function createAddPackageForm() {
+    
+//     const form = document.createElement("form");
+//     form.innerHTML = `
+//         <input type="text" name="name" placeholder="Package name" required>
+//         <input type="url" name="url" placeholder="Package URL" required>
+//         <button type="submit">Add package</button>
+//     `;
+
+//     form.addEventListener("submit", (event) => {
+//         event.preventDefault();
+//         const url = event.target.elements.url.value;
+
+//         const newPackage = {
+//             name: event.target.elements.name.value,
+//             // rating: parseFloat(event.target.elements.rating.value),
+//         };
+
+//         fetch("/package_storage", {
+//             method: "POST",
+//             headers: {
+//                 "Content-Type": "application/json",
+//             },
+//             body: JSON.stringify(newPackage),
+//         })
+//             .then(response => {
+//                 if (response.ok) {
+//                     fetchPackages();
+//                 } else {
+//                     console.error("Error adding package:", response.statusText);
+//                 }
+//             })
+//             .catch(error => console.error("Error adding package:", error));
+//     });
+
+//     return form;
+// }
 
 document.getElementById("add-package-form-container").appendChild(createAddPackageForm());
 
@@ -118,5 +177,31 @@ function fetchPackages() {
         })
         .catch(error => console.error("Error fetching package data:", error));
 }
+function admin_check_clear() {
+
+    // Check if user is an admin
+    var isAdmin = Boolean(sessionStorage.getItem("isAdmin")=="true");
+    if(!isAdmin) {
+        return
+    }
+    fetch('/clear_json_file', {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data.message);
+        fetchPackages(); // Fetch the updated package list and update the table
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+// function clearJsonFile() {
+
+// }
+
+
+
+
 
 fetchPackages();
