@@ -19,10 +19,6 @@ process.env.GITHUB_TOKEN;
 process.env.LOG_LEVEL;
 process.env.LOG_FILE;
 
-console.log(process.env.GITHUB_TOKEN)
-
-
-
 app.use(cors());
 app.use(express.json());
 app.use(express.static(__dirname));
@@ -34,15 +30,22 @@ const packagesFilePath = path.join(__dirname, "package_storage.json");
 
 
 // On get request for gcp_please
-app.get("/gcp_please", (req, res) => {
+app.get("/download", (req, res) => {
+    console.log("Downloading");
 
     let url = "https://github.com/lodash/lodash";
-    let username = "username";
     let repository;
     (async () => {
         try {
             // create repository object
-            repository = await repo_api.create_repo_from_url(url, username);
+            try {
+                const url = req.body.url;
+            } catch {
+
+            }
+            
+            repository = await create_repo_from_url(url,"username");
+            //repository = await repo_api.create_repo_from_url(url, username);
 
             if (!fs.existsSync("./tmp")) {
                 try {

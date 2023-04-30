@@ -9,7 +9,6 @@ const resultsBody = document.getElementById("results-body");
 const sortSelect = document.getElementById("sort-select");
 
 function createDownloadButton(packageName) {
-    var messages = [];
     var messageElement = document.getElementById("messages");
 
     const button = document.createElement("button");
@@ -17,28 +16,31 @@ function createDownloadButton(packageName) {
     button.addEventListener("click", () => {
         console.log(`Downloading ${packageName}...`);
 
-        // Auto send get request for gcp_please
-        window.location.href = "/gcp_please";
-        messages.push('Downloading');
+        // Auto send get request for download
+        window.location.href = "/download";
+        messageElement.innerText = "Downloading";
+        
+        /*
+        let url = "https://github.com/lodash/lodash";
 
         // Display download message
-        messageElement.innerText = messages.join(",");
+        messageElement.innerText = "Downloading";
 
-        /*
         fetch("/download", {
-            method: "GET",
+            method: "POST",
             headers: {
-                "Content-Type": "application/json",
-            }
-            //body: JSON.stringify(packageName),
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ url })
         }).then(response => {
             if (response.ok) {
-                window.location.href = "gcp_please";
+                window.location.href = "download";
             } else {
                 console.error("Error Downloading package:", response.statusText);
             }
         }).catch(error => console.error("Error Downloading Package:", error));
         */
+        
     });
     return button;
 }
@@ -106,6 +108,8 @@ sortSelect.addEventListener("change", () => {
 
 
 function createAddPackageForm() {
+
+    var messageElement = document.getElementById("messages");
     
     const form = document.createElement("form");
     form.innerHTML = `
@@ -115,6 +119,7 @@ function createAddPackageForm() {
     `;
 
     form.addEventListener("submit", async (event) => {
+        messageElement.innerText = "Collecting Package Info";
         event.preventDefault();
         
         const url = event.target.elements.url.value;
@@ -155,6 +160,7 @@ function createAddPackageForm() {
         } catch (error) {
             console.error("Error getting repo info:", error);
         }
+        messageElement.innerText = "";
     });
 
     return form;
