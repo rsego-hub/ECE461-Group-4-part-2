@@ -1,3 +1,7 @@
+// Object.defineProperty(exports, "__esModule", { value: true });
+// const { create_repo_from_url } = require('./out/api/repo.js');
+// import { create_repo_from_url } from './out/api/repo.js';
+
 let packages = [];
 
 const searchInput = document.getElementById("search-input");
@@ -61,7 +65,15 @@ function updateTable(searchTerm, sortMethod) {
         packages = [];
     }
     
-    const filteredPackages = packages.filter(package => package.name.toLowerCase().includes(searchTerm.toLowerCase()));
+    const filteredPackages = packages.filter(package => {
+        try {
+            const regex = new RegExp(searchTerm, "i");
+            return regex.test(package.name);
+        } catch (error) {
+            return false;
+        }
+    });
+    
     const sortedPackages = sortPackages(filteredPackages, sortMethod);
 
 
@@ -94,19 +106,20 @@ sortSelect.addEventListener("change", () => {
 
 
 function createAddPackageForm() {
+    
     const form = document.createElement("form");
     form.innerHTML = `
         <input type="text" name="name" placeholder="Package name" required>
-        <input type="number" name="rating" placeholder="Rating" step="0.1" min="0" max="5" required>
+        <input type="url" name="url" placeholder="Package URL" required>
         <button type="submit">Add package</button>
     `;
 
     form.addEventListener("submit", (event) => {
         event.preventDefault();
-
+        
         const newPackage = {
             name: event.target.elements.name.value,
-            rating: parseFloat(event.target.elements.rating.value),
+            // rating: parseFloat(event.target.elements.rating.value),
         };
 
         fetch("/package_storage", {
@@ -138,5 +151,31 @@ function fetchPackages() {
         })
         .catch(error => console.error("Error fetching package data:", error));
 }
+function admin_check_clear() {
+
+    // Check if user is an admin
+    var isAdmin = Boolean(sessionStorage.getItem("isAdmin")=="true");
+    if(!isAdmin) {
+        return
+    }
+    fetch('/clear_json_file', {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data.message);
+        fetchPackages(); // Fetch the updated package list and update the table
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+// function clearJsonFile() {
+
+// }
+
+
+
+
 
 fetchPackages();
