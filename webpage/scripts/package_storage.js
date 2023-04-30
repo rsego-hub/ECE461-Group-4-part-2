@@ -5,6 +5,9 @@ const resultsBody = document.getElementById("results-body");
 const sortSelect = document.getElementById("sort-select");
 
 function createDownloadButton(packageName) {
+    var messages = [];
+    var messageElement = document.getElementById("messages");
+
     const button = document.createElement("button");
     button.textContent = "Download";
     button.addEventListener("click", () => {
@@ -13,6 +16,8 @@ function createDownloadButton(packageName) {
         // PUT FETCH HERE
         // !!!!!!!!!!!!!!
         window.location.href = "/gcp_please";
+        messages.push('Downloading');
+        messageElement.innerText = messages.join(",");
         /*
         fetch("/download", {
             method: "GET",
