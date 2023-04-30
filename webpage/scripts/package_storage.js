@@ -9,10 +9,36 @@ const resultsBody = document.getElementById("results-body");
 const sortSelect = document.getElementById("sort-select");
 
 function createDownloadButton(packageName) {
+    var messages = [];
+    var messageElement = document.getElementById("messages");
+
     const button = document.createElement("button");
     button.textContent = "Download";
     button.addEventListener("click", () => {
         console.log(`Downloading ${packageName}...`);
+
+        // Auto send get request for gcp_please
+        window.location.href = "/gcp_please";
+        messages.push('Downloading');
+
+        // Display download message
+        messageElement.innerText = messages.join(",");
+
+        /*
+        fetch("/download", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            }
+            //body: JSON.stringify(packageName),
+        }).then(response => {
+            if (response.ok) {
+                window.location.href = "gcp_please";
+            } else {
+                console.error("Error Downloading package:", response.statusText);
+            }
+        }).catch(error => console.error("Error Downloading Package:", error));
+        */
     });
     return button;
 }
@@ -32,9 +58,13 @@ function sortPackages(packages, sortMethod) {
     }
 }
 
-function updateTable(searchTerm,sortMethod) {
+function updateTable(searchTerm, sortMethod) {
     resultsBody.innerHTML = "";
 
+    if(!Array.isArray(packages)) {
+        packages = [];
+    }
+    
     const filteredPackages = packages.filter(package => {
         try {
             const regex = new RegExp(searchTerm, "i");
@@ -76,8 +106,10 @@ sortSelect.addEventListener("change", () => {
 
 
 function createAddPackageForm() {
+    
     const form = document.createElement("form");
     form.innerHTML = `
+        <input type="text" name="name" placeholder="Package name" required>
         <input type="url" name="url" placeholder="Package URL" required>
         <button type="submit">Add package</button>
     `;

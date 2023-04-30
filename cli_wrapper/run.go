@@ -34,6 +34,11 @@ func install() {
 	cmd := exec.Command("bash", "-c", "npm install > /dev/null 2>&1")
 	execute(cmd)
 	fmt.Println("Dependencies installed")
+
+	os.Chdir("..")
+	cmd = exec.Command("bash", "-c", "npm install > /dev/null 2>&1")
+	execute(cmd)
+	fmt.Println("Server Dependencies installed")
 }
 
 /*
