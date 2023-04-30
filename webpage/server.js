@@ -49,6 +49,18 @@ app.post("/package_storage", (req, res) => {
     });
 });
 
+app.post('/clear_json_file', (req, res) => {
+    fs.writeFile(packagesFilePath, JSON.stringify([], null, 2), (err) => {
+        if (err) {
+            res.status(500).send({ error: "Error clearing JSON file." });
+            return;
+        }
+        res.status(200).send({ message: "JSON file cleared successfully." });
+    });
+});
+
+
+
 const PORT = process.env.PORT || 9000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
