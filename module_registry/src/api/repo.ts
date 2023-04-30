@@ -312,6 +312,8 @@ export class Repository {
  */
 export async function create_repo_from_url(url: string, creator_username: string) {
 
+    console.log("IN CREATE");
+
     // If given npmjs repo, get corresponding github repo
     let true_url = url;
     if (url.includes("npmjs.com")) {
@@ -326,12 +328,12 @@ export async function create_repo_from_url(url: string, creator_username: string
     
     // Collect repo info
     const parsed_repo = parse(true_url);
-
+    
     // Create basic repo object
     const repository = new Repository(parsed_repo.name, parsed_repo.owner, true_url, "1.0", 0, [], []);
 
-    // Collect dependencies and annd history event to repository
-    let dependencies = await repository.get_current_dependencies();
+    // Collect dependencies and history, then add to repository
+    repository.dependencies = await repository.get_current_dependencies();
     let first_history = new History("upload", repository.current_version, creator_username)
     repository.history_list.push(first_history)
 

@@ -12,6 +12,22 @@ function createDownloadButton(packageName) {
         // !!!!!!!!!!!!!!
         // PUT FETCH HERE
         // !!!!!!!!!!!!!!
+        window.location.href = "/gcp_please";
+        /*
+        fetch("/download", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            }
+            //body: JSON.stringify(packageName),
+        }).then(response => {
+            if (response.ok) {
+                window.location.href = "gcp_please";
+            } else {
+                console.error("Error Downloading package:", response.statusText);
+            }
+        }).catch(error => console.error("Error Downloading Package:", error));
+        */
     });
     return button;
 }
@@ -31,9 +47,13 @@ function sortPackages(packages, sortMethod) {
     }
 }
 
-function updateTable(searchTerm,sortMethod) {
+function updateTable(searchTerm, sortMethod) {
     resultsBody.innerHTML = "";
 
+    if(!Array.isArray(packages)) {
+        packages = [];
+    }
+    
     const filteredPackages = packages.filter(package => package.name.toLowerCase().includes(searchTerm.toLowerCase()));
     const sortedPackages = sortPackages(filteredPackages, sortMethod);
 
@@ -88,15 +108,13 @@ function createAddPackageForm() {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify(newPackage),
-        })
-            .then(response => {
-                if (response.ok) {
-                    fetchPackages();
-                } else {
-                    console.error("Error adding package:", response.statusText);
-                }
-            })
-            .catch(error => console.error("Error adding package:", error));
+        }).then(response => {
+            if (response.ok) {
+                fetchPackages();
+            } else {
+                console.error("Error adding package:", response.statusText);
+            }
+        }).catch(error => console.error("Error adding package:", error));
     });
 
     return form;
