@@ -221,7 +221,6 @@ function admin_check_clear() {
     })
     .then(response => response.json())
     .then(data => {
-        console.log(data.message);
         fetchPackages(); // Fetch the updated package list and update the table
     })
     .catch(error => {

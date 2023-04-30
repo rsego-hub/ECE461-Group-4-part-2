@@ -295,9 +295,6 @@ export class Repository {
             // regex behaving odddly for this, relying on includes instead
             if(!version_info.includes('-') && !version_info.includes('|') && !version_info.includes('<') && !version_info.includes('>')) {
                 num_pinned++;
-                console.log("is pinned".concat(version_info));
-            } else {
-                console.log("not pinned".concat(version_info));
             }
         }
 

@@ -1,7 +1,3 @@
-console.log('Current directory: ' + process.cwd());
-
-Object.defineProperty(exports, "__esModule", { value: true });
-
 const repo_api = require("./scripts/out/api/repo");
 const clone_api = require("./scripts/out/api/clone");
 
@@ -62,7 +58,6 @@ app.get("/gcp_please", (req, res) => {
                 'Content-Disposition': `attachment; filename="${fileName}"`,
                 'Content-Type': fileType,
             })
-            console.log("Process complete");
             return res.end(zipFileContents);
 
         } catch (e) {
