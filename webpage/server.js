@@ -12,6 +12,10 @@ const fs = require("fs");
 const app = express();
 const bodyParser = require("body-parser");
 const path = require("path");
+const { create_repo_from_url } = require('./scripts/out/api/repo.js');
+const { Repository, PackageDatabase } = require('./scripts/out/api/repo.js');
+
+
 
 
 app.use(cors());
@@ -123,6 +127,20 @@ app.post('/clear_json_file', (req, res) => {
     });
 });
 
+
+app.post('/get_repo_info', async (req, res) => {
+    try {
+        const url = req.body.url;
+        const repoInfo = await create_repo_from_url(url,"Robert_is_my_username");
+        const name = repoInfo.name;
+        const rating = await repoInfo.get_rating();
+
+        res.json({ name: name, rating: rating });
+    } catch (error) {
+        console.error("Error getting repository info:", error);
+        res.status(500).json({ error: "Error getting repository info" });
+    }
+});
 
 
 const PORT = process.env.PORT || 9000;
