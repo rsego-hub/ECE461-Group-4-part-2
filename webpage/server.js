@@ -11,6 +11,15 @@ const path = require("path");
 const { create_repo_from_url } = require('./scripts/out/api/repo.js');
 const { Repository, PackageDatabase } = require('./scripts/out/api/repo.js');
 
+var dotenv = require('dotenv');
+//dotenv.config({ path: path.resolve(process.cwd().substring(0, process.cwd().lastIndexOf('/')), '.env') });
+dotenv.config({ path: path.resolve('.env') });
+
+process.env.GITHUB_TOKEN;
+process.env.LOG_LEVEL;
+process.env.LOG_FILE;
+
+console.log(process.env.GITHUB_TOKEN)
 
 
 
@@ -125,10 +134,16 @@ app.post('/clear_json_file', (req, res) => {
 
 app.post('/get_repo_info', async (req, res) => {
     try {
+
+        console.log("Creating repo");
         const url = req.body.url;
-        const repoInfo = await create_repo_from_url(url,"Robert_is_my_username");
+        const repoInfo = await create_repo_from_url(url,"username");
         const name = repoInfo.name;
+
+        console.log("Getting rating");
         const rating = await repoInfo.get_rating();
+        console.log(rating);
+        
 
         res.json({ name: name, rating: rating });
     } catch (error) {

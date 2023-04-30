@@ -227,12 +227,12 @@ function admin_check_clear() {
         console.error('Error:', error);
     });
 }
-// function clearJsonFile() {
-
-// }
 
 
+// ------------------ Main Script ------------------------------
 
-
+if(sessionStorage.getItem("loggedIn") != "true") {
+    window.location.href = "index.html";
+}
 
 fetchPackages();
