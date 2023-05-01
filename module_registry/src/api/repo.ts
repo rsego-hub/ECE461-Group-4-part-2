@@ -210,8 +210,12 @@ export class Repository {
 
             // Get dependency names and their version numbers
             let dependencies = [];
+            
             for(let dependency of response.data.sbom.packages) {
-                dependencies.push(dependency.name.concat(",", dependency.versionInfo));
+                if ((dependency.name != undefined) && (dependency.versionInfo != undefined)){
+                    dependencies.push(dependency.name.concat(",", dependency.versionInfo));
+                }
+                    
             }
 
             return dependencies
