@@ -92,7 +92,7 @@ if (options.file) {
             const correctness = calculateCorrectness(`./tmp/${repo.name}`);
             await deleteClonedRepo(`./tmp/${repo.name}`);
 
-            const netScore = calculateNetScore(rampUp, correctness, busFactor, responsiveness, licenseCompatibility);
+            const netScore = calculateNetScore(rampUp, correctness, busFactor, responsiveness, licenseCompatibility, 0, 0);
             // print all scores the the console rounded to 2 decimal places
             console.log(`${url} ${netScore.toFixed(2)} ${rampUp.toFixed(2)} ${correctness.toFixed(2)} ${busFactor.toFixed(2)} ${responsiveness.toFixed(2)} ${licenseCompatibility.toFixed(2)}`)
             //console.log(`${url} ${netScore} ${rampUp} ${correctness} ${busFactor} ${responsiveness} ${licenseCompatibility}`)

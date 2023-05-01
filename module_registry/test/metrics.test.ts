@@ -98,7 +98,7 @@ describe('responsiveness metric', () => {
 
 describe('net score', () => {
     test('calculates net score between 1 and 0', async () => {
-        let result = calculateNetScore(0.5, 0.5, 0.5, 0.5, 0.5);
+        let result = calculateNetScore(0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5);
         expect(result).toBeLessThanOrEqual(1);
         expect(result).toBeGreaterThanOrEqual(0);
         expect(logToFile).toHaveBeenCalledTimes(2);

@@ -22,9 +22,9 @@ function handleRegisterSubmit(event) {
     } else if (password.value.length < 5) {
         messages.push('Password should be at least 5 characters');
     } else {
-        for(let line of user_lines) {
+        for (let line of user_lines) {
             // don't allow users to have same username as others or admin
-            if(line.split(" ")[0] == username.value || "ece30861defaultadminuser" == username.value) {
+            if (line.split(" ")[0] == username.value || "ece30861defaultadminuser" == username.value) {
                 messages.push('Username already exists');
                 break;
             }
@@ -38,8 +38,8 @@ function handleRegisterSubmit(event) {
 
         // Make new file contents by attaching new users to old file
         let new_contents = "";
-        for(let line of user_lines) {
-            if(line != "") {
+        for (let line of user_lines) {
+            if (line != "") {
                 new_contents = new_contents.concat(line, "\n");
             }
         }
@@ -64,11 +64,11 @@ exports.go_to_main = go_to_main;
 
 // ------------------ Main Script ------------------------------
 
-if(sessionStorage.getItem("loggedIn") != "true") {
-    window.location.href = "index.html";
+if (sessionStorage.getItem("loggedIn") != "true") {
+    window.location.href = "authenticate.html";
 }
 
 var form_R = document.getElementById("form-R");
-if(form_R != null) {
+if (form_R != null) {
     form_R.addEventListener("submit", handleRegisterSubmit);
 }

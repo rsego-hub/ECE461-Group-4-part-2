@@ -170,11 +170,13 @@ export class Repository {
             let rampUp = calculateRampUp(communityProfileResponse, readmeResponse);
             let responsiveness = calculateResponsiveness(issuesResponse);
             let licenseCompatibility = calculateLicenseCompatibility(licenseResponse, readmeResponse);
+            let review = await this.review_metric();
+            let pinned = await this.pinned_metric();
             let correctness = calculateCorrectness(`./tmp/${this.name}`);
             await deleteClonedRepo(`./tmp/${this.name}`);
 
             // calculate weighted score
-            let netScore = calculateNetScore(rampUp, correctness, busFactor, responsiveness, licenseCompatibility);
+            let netScore = calculateNetScore(rampUp, correctness, busFactor, responsiveness, licenseCompatibility, review, pinned);
 
             return netScore;
         } catch (error) {
@@ -299,9 +301,6 @@ export class Repository {
             // regex behaving odddly for this, relying on includes instead
             if(!version_info.includes('-') && !version_info.includes('|') && !version_info.includes('<') && !version_info.includes('>')) {
                 num_pinned++;
-                console.log("is pinned".concat(version_info));
-            } else {
-                console.log("not pinned".concat(version_info));
             }
         }
 
@@ -315,8 +314,6 @@ export class Repository {
  * @returns correctly instantiated repostory object
  */
 export async function create_repo_from_url(url: string, creator_username: string) {
-
-    console.log("IN CREATE");
 
     // If given npmjs repo, get corresponding github repo
     let true_url = url;

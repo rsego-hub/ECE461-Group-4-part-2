@@ -1,7 +1,3 @@
-console.log('Current directory: ' + process.cwd());
-
-Object.defineProperty(exports, "__esModule", { value: true });
-
 const repo_api = require("./scripts/out/api/repo");
 const clone_api = require("./scripts/out/api/clone");
 
@@ -18,6 +14,8 @@ const { Repository, PackageDatabase } = require('./scripts/out/api/repo.js');
 
 
 
+
+
 app.use(cors());
 app.use(express.json());
 app.use(express.static(__dirname));
@@ -29,9 +27,10 @@ const packagesFilePath = path.join(__dirname, "package_storage.json");
 
 
 // On get request for gcp_please
-app.get("/gcp_please", (req, res) => {
+app.post("/gcp_please", (req, res) => {
+    let url = req.body.url;
 
-    let url = "https://github.com/lodash/lodash";
+    // let url = "https://github.com/lodash/lodash";
     let username = "username";
     let repository;
     (async () => {
@@ -100,12 +99,12 @@ app.post("/package_storage", (req, res) => {
         }
 
         let packages = JSON.parse(data);
-        if(Array.isArray(packages)) {
+        if (Array.isArray(packages)) {
             packages.push(newPackage);
         } else {
             packages = [newPackage];
         }
-        
+
         fs.writeFile(packagesFilePath, JSON.stringify(packages, null, 2), (err) => {
             if (err) {
                 res.status(500).send({ error: "Error writing packages file." });
@@ -131,7 +130,7 @@ app.post('/clear_json_file', (req, res) => {
 app.post('/get_repo_info', async (req, res) => {
     try {
         const url = req.body.url;
-        const repoInfo = await create_repo_from_url(url,"Robert_is_my_username");
+        const repoInfo = await create_repo_from_url(url, "Robert_is_my_username");
         const name = repoInfo.name;
         const rating = await repoInfo.get_rating();
 
@@ -140,6 +139,10 @@ app.post('/get_repo_info', async (req, res) => {
         console.error("Error getting repository info:", error);
         res.status(500).json({ error: "Error getting repository info" });
     }
+});
+
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "authenticate.html"));
 });
 
 
