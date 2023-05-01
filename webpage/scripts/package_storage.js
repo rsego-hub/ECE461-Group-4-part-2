@@ -8,39 +8,48 @@ const searchInput = document.getElementById("search-input");
 const resultsBody = document.getElementById("results-body");
 const sortSelect = document.getElementById("sort-select");
 
-function createDownloadButton(packageName) {
+
+
+async function downloadRepository(url) {
+    try {
+        const response = await fetch('/gcp_please', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ url }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Download failed');
+        }
+
+        const blob = await response.blob();
+        const fileName = url.split('/').pop() + '.zip';
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = fileName;
+        link.click();
+    } catch (error) {
+        console.error('Error downloading repository:', error);
+    }
+}
+
+function createDownloadButton(package) {
+    var messages = [];
     var messageElement = document.getElementById("messages");
 
     const button = document.createElement("button");
     button.textContent = "Download";
     button.addEventListener("click", () => {
-        console.log(`Downloading ${packageName}...`);
+        console.log(`Downloading ${package.name}...`);
 
-        // Auto send get request for download
-        window.location.href = "/download";
-        messageElement.innerText = "Downloading";
-        
-        /*
-        let url = "https://github.com/lodash/lodash";
+        downloadRepository(package.url);
+
+        messages.push('Downloading');
 
         // Display download message
-        messageElement.innerText = "Downloading";
-
-        fetch("/download", {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ url })
-        }).then(response => {
-            if (response.ok) {
-                window.location.href = "download";
-            } else {
-                console.error("Error Downloading package:", response.statusText);
-            }
-        }).catch(error => console.error("Error Downloading Package:", error));
-        */
-        
+        messageElement.innerText = messages.join(",");
     });
     return button;
 }
@@ -63,10 +72,10 @@ function sortPackages(packages, sortMethod) {
 function updateTable(searchTerm, sortMethod) {
     resultsBody.innerHTML = "";
 
-    if(!Array.isArray(packages)) {
+    if (!Array.isArray(packages)) {
         packages = [];
     }
-    
+
     const filteredPackages = packages.filter(package => {
         try {
             const regex = new RegExp(searchTerm, "i");
@@ -75,7 +84,7 @@ function updateTable(searchTerm, sortMethod) {
             return false;
         }
     });
-    
+
     const sortedPackages = sortPackages(filteredPackages, sortMethod);
 
 
@@ -91,7 +100,7 @@ function updateTable(searchTerm, sortMethod) {
         row.appendChild(ratingCell);
 
         const downloadCell = document.createElement("td");
-        downloadCell.appendChild(createDownloadButton(package.name));
+        downloadCell.appendChild(createDownloadButton(package));
         row.appendChild(downloadCell);
 
         resultsBody.appendChild(row);
@@ -109,21 +118,18 @@ sortSelect.addEventListener("change", () => {
 
 function createAddPackageForm() {
 
-    var messageElement = document.getElementById("messages");
-    
     const form = document.createElement("form");
     form.innerHTML = `
-        <input type="text" name="name" placeholder="Package name" required>
+
         <input type="url" name="url" placeholder="Package URL" required>
         <button type="submit">Add package</button>
     `;
 
     form.addEventListener("submit", async (event) => {
-        messageElement.innerText = "Collecting Package Info";
         event.preventDefault();
-        
+
         const url = event.target.elements.url.value;
-        
+
         try {
             const response = await fetch('/get_repo_info', {
                 method: 'POST',
@@ -137,7 +143,8 @@ function createAddPackageForm() {
                 const { name, rating } = await response.json();
                 const newPackage = {
                     name,
-                    rating
+                    rating,
+                    url
                 };
 
                 // Post the newPackage to /package_storage
@@ -160,49 +167,11 @@ function createAddPackageForm() {
         } catch (error) {
             console.error("Error getting repo info:", error);
         }
-        messageElement.innerText = "";
     });
 
     return form;
 }
 
-// function createAddPackageForm() {
-    
-//     const form = document.createElement("form");
-//     form.innerHTML = `
-//         <input type="text" name="name" placeholder="Package name" required>
-//         <input type="url" name="url" placeholder="Package URL" required>
-//         <button type="submit">Add package</button>
-//     `;
-
-//     form.addEventListener("submit", (event) => {
-//         event.preventDefault();
-//         const url = event.target.elements.url.value;
-
-//         const newPackage = {
-//             name: event.target.elements.name.value,
-//             // rating: parseFloat(event.target.elements.rating.value),
-//         };
-
-//         fetch("/package_storage", {
-//             method: "POST",
-//             headers: {
-//                 "Content-Type": "application/json",
-//             },
-//             body: JSON.stringify(newPackage),
-//         })
-//             .then(response => {
-//                 if (response.ok) {
-//                     fetchPackages();
-//                 } else {
-//                     console.error("Error adding package:", response.statusText);
-//                 }
-//             })
-//             .catch(error => console.error("Error adding package:", error));
-//     });
-
-//     return form;
-// }
 
 document.getElementById("add-package-form-container").appendChild(createAddPackageForm());
 
@@ -218,27 +187,28 @@ function fetchPackages() {
 function admin_check_clear() {
 
     // Check if user is an admin
-    var isAdmin = Boolean(sessionStorage.getItem("isAdmin")=="true");
-    if(!isAdmin) {
+    var isAdmin = Boolean(sessionStorage.getItem("isAdmin") == "true");
+    if (!isAdmin) {
         return
     }
     fetch('/clear_json_file', {
         method: 'POST'
     })
-    .then(response => response.json())
-    .then(data => {
-        fetchPackages(); // Fetch the updated package list and update the table
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
+        .then(response => response.json())
+        .then(data => {
+            console.log(data.message);
+            fetchPackages(); // Fetch the updated package list and update the table
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
 }
+// function clearJsonFile() {
+
+// }
 
 
-// ------------------ Main Script ------------------------------
 
-if(sessionStorage.getItem("loggedIn") != "true") {
-    window.location.href = "index.html";
-}
+
 
 fetchPackages();

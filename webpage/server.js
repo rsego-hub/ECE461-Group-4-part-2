@@ -11,13 +11,10 @@ const path = require("path");
 const { create_repo_from_url } = require('./scripts/out/api/repo.js');
 const { Repository, PackageDatabase } = require('./scripts/out/api/repo.js');
 
-var dotenv = require('dotenv');
-//dotenv.config({ path: path.resolve(process.cwd().substring(0, process.cwd().lastIndexOf('/')), '.env') });
-dotenv.config({ path: path.resolve('.env') });
 
-process.env.GITHUB_TOKEN;
-process.env.LOG_LEVEL;
-process.env.LOG_FILE;
+
+
+
 
 app.use(cors());
 app.use(express.json());
@@ -30,22 +27,16 @@ const packagesFilePath = path.join(__dirname, "package_storage.json");
 
 
 // On get request for gcp_please
-app.get("/download", (req, res) => {
-    console.log("Downloading");
+app.post("/gcp_please", (req, res) => {
+    let url = req.body.url;
 
-    let url = "https://github.com/lodash/lodash";
+    // let url = "https://github.com/lodash/lodash";
+    let username = "username";
     let repository;
     (async () => {
         try {
             // create repository object
-            try {
-                const url = req.body.url;
-            } catch {
-
-            }
-            
-            repository = await create_repo_from_url(url,"username");
-            //repository = await repo_api.create_repo_from_url(url, username);
+            repository = await repo_api.create_repo_from_url(url, username);
 
             if (!fs.existsSync("./tmp")) {
                 try {
@@ -70,6 +61,7 @@ app.get("/download", (req, res) => {
                 'Content-Disposition': `attachment; filename="${fileName}"`,
                 'Content-Type': fileType,
             })
+            console.log("Process complete");
             return res.end(zipFileContents);
 
         } catch (e) {
@@ -107,12 +99,12 @@ app.post("/package_storage", (req, res) => {
         }
 
         let packages = JSON.parse(data);
-        if(Array.isArray(packages)) {
+        if (Array.isArray(packages)) {
             packages.push(newPackage);
         } else {
             packages = [newPackage];
         }
-        
+
         fs.writeFile(packagesFilePath, JSON.stringify(packages, null, 2), (err) => {
             if (err) {
                 res.status(500).send({ error: "Error writing packages file." });
@@ -137,22 +129,20 @@ app.post('/clear_json_file', (req, res) => {
 
 app.post('/get_repo_info', async (req, res) => {
     try {
-
-        console.log("Creating repo");
         const url = req.body.url;
-        const repoInfo = await create_repo_from_url(url,"username");
+        const repoInfo = await create_repo_from_url(url, "Robert_is_my_username");
         const name = repoInfo.name;
-
-        console.log("Getting rating");
         const rating = await repoInfo.get_rating();
-        console.log(rating);
-        
 
         res.json({ name: name, rating: rating });
     } catch (error) {
         console.error("Error getting repository info:", error);
         res.status(500).json({ error: "Error getting repository info" });
     }
+});
+
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "authenticate.html"));
 });
 
 
