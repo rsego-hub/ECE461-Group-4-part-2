@@ -22,10 +22,10 @@ const parse = require("parse-github-url");
 const fs = require("fs");
 
 export class PackageDatabase {
-    repository_list:Repository[];
-    package_directory_path:string;
+    repository_list: Repository[];
+    package_directory_path: string;
 
-    constructor(repository_list:Repository[], package_directory_path:string) {
+    constructor(repository_list: Repository[], package_directory_path: string) {
         this.package_directory_path = package_directory_path;
         this.repository_list = repository_list;
     }
@@ -35,9 +35,9 @@ export class PackageDatabase {
      * @param package_name string name of package
      * @returns package contents in UNIMLEMENTED format, or null on failure
      */
-    get_contents_of(package_name:string) {
-        for(let repo of this.repository_list) {
-            if(repo.name == package_name) {
+    get_contents_of(package_name: string) {
+        for (let repo of this.repository_list) {
+            if (repo.name == package_name) {
                 return repo.get_contents(this.package_directory_path);
             }
         }
@@ -49,9 +49,9 @@ export class PackageDatabase {
      * @param new_repo 
      * @returns {boolean} repo added or not
      */
-    addPackage(new_repo:Repository) {
-        for(let repo of this.repository_list) {
-            if(repo.name == new_repo.name) {
+    addPackage(new_repo: Repository) {
+        for (let repo of this.repository_list) {
+            if (repo.name == new_repo.name) {
                 return false;
             }
         }
@@ -60,7 +60,7 @@ export class PackageDatabase {
     }
 
     // UNIMPLEMENTED
-    updatePackage(name:string, new_version:string, new_contents:unknown) {
+    updatePackage(name: string, new_version: string, new_contents: unknown) {
         return -1;
     }
 
@@ -69,11 +69,11 @@ export class PackageDatabase {
      * @param queried_name string representing name being searched for
      * @returns list of repositories that match the queried name
      */
-    search_by_name(queried_name:string) {
-        let name_matched_repo_list:Repository[] = [];
-        for(let repo of this.repository_list) {
+    search_by_name(queried_name: string) {
+        let name_matched_repo_list: Repository[] = [];
+        for (let repo of this.repository_list) {
             // Check if name matches, ignore case
-            if(repo.name.toLowerCase().includes(queried_name.toLowerCase())) {
+            if (repo.name.toLowerCase().includes(queried_name.toLowerCase())) {
                 name_matched_repo_list.push(repo);
             }
         }
@@ -86,13 +86,13 @@ export class PackageDatabase {
      * @param regexp regular expression being used
      * @returns list of repositories that contain positive result for the regular expression
      */
-    async search_by_regex(regexp:RegExp) {
-        let regex_matched_repo_list:Repository[] = [];
-        for(let repo of this.repository_list) {
+    async search_by_regex(regexp: RegExp) {
+        let regex_matched_repo_list: Repository[] = [];
+        for (let repo of this.repository_list) {
             let repo_readme_response = await repo.get_readme()
             let readme_text = Buffer.from(repo_readme_response.data.content, "base64").toString("ascii");
             // Check if regex matches name or readme, ignore case
-            if(regexp.test(repo.name) || regexp.test(readme_text)) {
+            if (regexp.test(repo.name) || regexp.test(readme_text)) {
                 regex_matched_repo_list.push(repo);
             }
         }
@@ -111,7 +111,7 @@ export class Repository {
     history_list: History[];
     dependencies: string[];
 
-    constructor(name:string, owner: string, url: string, current_version:string, size:Number, history_list:History[], dependencies:string[]) {
+    constructor(name: string, owner: string, url: string, current_version: string, size: Number, history_list: History[], dependencies: string[]) {
         this.name = name;
         this.owner = owner;
         this.url = url;
@@ -127,7 +127,7 @@ export class Repository {
      * @param path Path to directory containing package
      * @returns Package contents OR success status, unsure of exact implementation
      */
-    get_contents(path:string) {
+    get_contents(path: string) {
         return -1;
     }
 
@@ -135,7 +135,7 @@ export class Repository {
      * Adds history event to repo history
      * @param new_history 
      */
-    add_history(new_history:History) {
+    add_history(new_history: History) {
         this.history_list.push(new_history);
     }
 
@@ -156,7 +156,7 @@ export class Repository {
 
         try {
             // Get repo features
-        	let communityProfileResponse = await getCommunityProfile(this.owner, this.name);
+            let communityProfileResponse = await getCommunityProfile(this.owner, this.name);
             let issuesResponse = await getIssues(this.owner, this.name);
             let readmeResponse = await getReadme(this.owner, this.name);
             let licenseResponse = await getLicense(this.owner, this.name);
@@ -207,13 +207,14 @@ export class Repository {
                 owner: this.owner,
                 repo: this.name,
                 basehead: "main"
-                
+
             });
 
             // Get dependency names and their version numbers
             let dependencies = [];
-            for(let dependency of response.data.sbom.packages) {
-                dependencies.push(dependency.name.concat(",", dependency.versionInfo));
+            for (let dependency of response.data.sbom.packages) {
+                if ((dependency.name) != undefined && (dependency.versionInfo != undefined))
+                    dependencies.push(dependency.name.concat(",", dependency.versionInfo));
             }
 
             return dependencies
@@ -223,14 +224,14 @@ export class Repository {
             throw error;
         }
     }
-    
+
     /**
      * Uses pull request query to find how much of the code was reviewed before it was added
      * to the repository
      * @returns 0-1 representing porportion of reviewed code
      */
     async review_metric() {
-        
+
         // get list of pull requests
         let pullResponse;
         const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
@@ -244,24 +245,24 @@ export class Repository {
             console.error(error);
             throw error;
         }
-        
+
         // No pull requests made, score is 0 since all pushes were to main and unreviewed
-        if(pullResponse.data.length == 0) {
+        if (pullResponse.data.length == 0) {
             return 0;
         }
 
         // Get list of the review comments urls for each merged pull request
         let review_comments_urls = [];
-        for(let pull of pullResponse.data) {
-            if(pull.merged_at != null) {
+        for (let pull of pullResponse.data) {
+            if (pull.merged_at != null) {
                 review_comments_urls.push(pull.review_comments_url)
             }
         }
-        
+
         // Check reviews, add to num reviewed if not empty
         let num_reviewed = 0;
         let review_comment_response;
-        for(let url of review_comments_urls) {
+        for (let url of review_comments_urls) {
             try {
                 review_comment_response = await octokit.request('GET '.concat(url));
             } catch (error) {
@@ -269,15 +270,15 @@ export class Repository {
                 throw error;
             }
 
-            if(JSON.stringify(review_comment_response.data) != "[]") {
+            if (JSON.stringify(review_comment_response.data) != "[]") {
                 num_reviewed += 1;
             }
         }
 
         // return reviewed requests divided by number of all pull requests
-        return (num_reviewed/pullResponse.data.length);
+        return (num_reviewed / pullResponse.data.length);
     }
-    
+
     /**
      * calculate metric for number of version specific dependencies
      * @returns 0-1, 1 representing all dependencies are version specific, 0 represents none
@@ -285,22 +286,22 @@ export class Repository {
     pinned_metric() {
         // Get number of all dependencies
         let num_dependencies = this.dependencies.length;
-        if(num_dependencies == 0) {
+        if (num_dependencies == 0) {
             return 1; // no dependencies, nothing needs to be pinned
         }
 
         // Count number of pinned dependencies
         let num_pinned = 0;
         let is_not_pinned = new RegExp('-|\||>|<');
-        for(let dependency of this.dependencies) {
+        for (let dependency of this.dependencies) {
             let version_info = dependency.split(",")[1]
             // regex behaving odddly for this, relying on includes instead
-            if(!version_info.includes('-') && !version_info.includes('|') && !version_info.includes('<') && !version_info.includes('>')) {
+            if (!version_info.includes('-') && !version_info.includes('|') && !version_info.includes('<') && !version_info.includes('>')) {
                 num_pinned++;
             }
         }
 
-        return num_pinned/num_dependencies;
+        return num_pinned / num_dependencies;
     }
 }
 
@@ -314,7 +315,7 @@ export async function create_repo_from_url(url: string, creator_username: string
     // If given npmjs repo, get corresponding github repo
     let true_url = url;
     if (url.includes("npmjs.com")) {
-        const [ pkgName ] = url.split("/").slice(-1);
+        const [pkgName] = url.split("/").slice(-1);
         try {
             true_url = await getPkgGithubURL(pkgName, 'latest');
         } catch (error) {
@@ -322,10 +323,10 @@ export async function create_repo_from_url(url: string, creator_username: string
             logToFile(url, 1, "URL", "does not have a github repository");
         }
     }
-    
+
     // Collect repo info
     const parsed_repo = parse(true_url);
-    
+
     // Create basic repo object
     const repository = new Repository(parsed_repo.name, parsed_repo.owner, true_url, "1.0", 0, [], []);
 
@@ -342,7 +343,7 @@ export class History {
     version: string;
     username: string;
 
-    constructor(action:string, version:string, username:string) {
+    constructor(action: string, version: string, username: string) {
         this.action = action;
         this.version = version;
         this.username = username;
