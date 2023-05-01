@@ -107,7 +107,7 @@ describe('Repo Api Integration Tests', () => {
         logToFile(metric, 0, "browserify pinned metric");
         expect(Math.round(metric*100)/100).not.toBe(-1)
 
-        // Browserify NEVER pins to major minor version, so should be 0, but can't guarantee so tests for -1
+        // Lodash NEVER pins to major minor version, so should be 0, but can't guarantee so tests for -1
         repo = await create_repo_from_url("https://github.com/lodash/lodash", "username");
         metric = await repo.pinned_metric();
         logToFile(metric, 0, "lodash pinned metric");
