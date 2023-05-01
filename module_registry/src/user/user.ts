@@ -20,7 +20,8 @@ export class UserDatabase {
             }
         }
 
-        this.user_list = [new User('ece30861defaultadminuser','correcthorsebatterystaple123(!__+@**(A’”`;DROP TABLE packages;', true)];
+        // correcthorsebatterystaple123(!__+@**(A'"`;DROP TABLE packages;
+        this.user_list = [new User('ece30861defaultadminuser','correcthorsebatterystaple123(!__+@**(A\'\"`;DROP TABLE packages;', true)];
         return false; // no admin found, default admin created
     }
 
