@@ -48,7 +48,7 @@ const file_lines = get_users("user_list.txt")
 
 // create database from users read in, also add admin
 var database = new UserDatabase([]); // Create database, create admin but don't add
-const adminUser = new User('ece30861defaultadminuser','correcthorsebatterystaple123(!__+@**(A’”`;DROP TABLE packages;',true)
+const adminUser = new User('ece30861defaultadminuser','correcthorsebatterystaple123(!__+@**(A\'\"`;DROP TABLE packages;',true)
 database.addUser(adminUser);
 for(const line of file_lines) {
     var user_vals = line.split(" ")
